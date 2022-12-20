@@ -1,0 +1,89 @@
+how to use the malware lab: workflow 1
+
+
+static analysis:
+>analyze malware w/o running it
+
+goal: 
+>extract ioc's [KC4 - KC6] + useful info [threat attribution, TTPs]
+
+
+benefits: 
+>enables internal malware DB: data will be documented for analysts to back-search against for future incidents.
+>helps create sequential parent-child process chain for those hunting for KC7 iocs. 
+
+
+static flow:
+
+perform hunt for the following artifacts:
+>File hash*: [md5/sha256] *1st check if publically known, then resume acquiring remaining artifacts*
+*avoid duplicate effort when time sensitive*
+>File Target OS: [win/nix*]
+>>	Win OS:
+>>>>	File Header + Magic Number/Hex: [4560=PE, etc] *PE Header begins at hex:5045*
+>>>>	File Signature: [PE, CMD, etc] *avoids FP from double extensions*
+>>>>	File Format: [exe/dll/png/jpg/mp3/iso/etc]
+>>>>	File architexture: [x86bit or x64bit]
+>>>> 	File Strings: what malware can do [unobfuscated metadata]
+>>> Nix* OS:
+>>>>	File Headers: [can reveal malware functions]
+>>>>	File Format: [elf/etc]
+>>>>	File architecture: [x86bit or x64bit]
+>>>> 	File Strings: what malware can do [unobfuscated metadata]
+>>>>	
+
+
+>File Packer Behaviour: [yes/no]
+>>File Packer Technique: [UPX/FastPack/custom]
+
+
+
+PE Info:
+contains *structure*
+https://learn.microsoft.com/en-us/archive/msdn-magazine/2002/february/inside-windows-win32-portable-executable-file-format-in-detail
+
+Toolkit:
+HxD [hex editor]
+Exeinfo PE [header + packer info]
+PEStudio [PE analyzer]
+CFF explorer [header info]
+
+
+
+Hashing:
+generates cryptographic algorithm against file
+
+common algorithms:
+md5, sha1, sha256
+*as of Dec 19, 2022, sha1 is no longer in use*
+
+goal:
+>unique fingeprint for specific malware sample
+
+benefits:
+>enables integrity + accuracy when handling various malware samples
+>perform osint searches to acquire more artifacts + avoid duplicate analysis when time sensitive / or use other known documented analyis to guide current analysis.
+
+Toolkit:
+Hashmyfiles
+HashCalc
+PEStudio
+Cmd>CertUtil
+
+Strings:
+>useful human-readables ASCII or Unicode
+
+look for:
+>Files Names
+>URLs [that malware connects to]
+>IP Addrs 
+>Reg Keys
+
+Tip: Malware Author can utilize dummy strings for obfuscation.
+
+Toolkit: 
+CMD>Strings
+[strings -a -n 6 c:/downloads/file]
+PEStudio
+[strings + group 30 [imported dll]]
+peid
