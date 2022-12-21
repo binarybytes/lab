@@ -58,7 +58,7 @@ md5, sha1, sha256
 *as of Dec 19, 2022, sha1 is no longer in use*
 
 goal:
->unique fingeprint for specific malware sample
+>unique fingeprint of malware sample
 
 benefits:
 >enables integrity + accuracy when handling various malware samples
@@ -79,7 +79,7 @@ look for:
 >IP Addrs 
 >Reg Keys
 
-Tip: Malware Author can utilize dummy strings for obfuscation.
+Tip: Malware Author can utilize dummy strings for +obfuscation.
 
 Toolkit: 
 CMD>Strings
@@ -87,3 +87,97 @@ CMD>Strings
 PEStudio
 [strings + group 30 [imported dll]]
 peid
+
+Packers
+benign goal: compression
+
+malicious goal: obfuscation
+
+xx
+packers compress an exe.
+at runtime, the compressed exe will decompress.
+post exploit stages presents unpacked + original data.
+
+benefits: useful for analysis
+
+
+Toolkit:
+Cmd>Strings
+UPX
+ExePE info
+
+
+https://www.howtogeek.com/427805/how-to-use-the-strings-command-on-linux/
+
+
+searching for ascii, the range is 8 chars.
+
+6 or 8,
+min is 4?
+
+strings -a [ascii only]
+
+strings -a -n 8 [minimum string length]
+
+
+strings -a -n 8 C:/dir/file > C:/dir/strings.txt [place output here]
+
+
+PE Header:
+goal: hosts data used by target OS for execution
+
+benefit: 
+>how malware talks to target OS
+>display memory map aka how its loaded in memory
+>displays imports + libraries the file needs for runtime
+>displays OEP [useful for dynamic analysis]
+
+
+PE Header Structure:
+
+https://learn.microsoft.com/en-us/archive/msdn-magazine/2002/february/images/cc301805.pefig01(en-us,msdn.10).gif
+
+
+MZ/DOS: defines binary as [executable]
+DOS Stub: "Progam cannot run in DOS Mode" - compatability
+PE File Header[Signature]: defines executable as [PE]
+Image Optional Header: metadata [OEP]
+Section Table: how exe can load in memory
+Sections: exe can use data stored here 
+
+
+Section Table aka Headers:
+headers is the [About Us] page for the exe
+sections is [raw or unmapped code] of the exe
+
+.code/.text = exe code
+.data = stores data [r/w]
+.rdata = stores data [r]
+.idata = stores import table
+.edata = stores export data
+.rsrc = stores resources (strings,icons, dialogs)
+
+
+upx packers change the section names from
+.rdata to upx, upx1, upx2 etc
+
+
+Analyze PE Header:
+compiler stamp - when/where malware was compiled [mal authors may use older dates to throw off analysis*]
+subsystem - wat subsystem is used [like GUI subsystem]
+sections - is the exe packed + any inconsistent permissions 
+libraries + imports - which libs + imports 
+
+
+*if date is older, good chance the analysis was historically performed, can guide current analysis*
+
+PEStudio converts the compiler stamp to -H
+CFF doesn't
+
+
+imports:
+-blacklist imports doesnt mean its blacklisted,
+just flagged as such
+-kernel32.dll [interacts w/ system; expected]
+-advapi32.dll [talks to registry]
+-winsock/wininet.dll [network]
