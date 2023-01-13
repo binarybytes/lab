@@ -1,20 +1,24 @@
-how to use the malware lab: workflow 1
+################################################################
+#            how to use the malware lab: workflow 1            #
+################################################################
 
 
+----------------------------------------------------------------
 static analysis:
 >analyze malware w/o running it
-
+----------------------------------------------------------------
 goal: 
+----------------------------------------------------------------
 >extract ioc's [KC4 - KC6] + useful info [threat attribution, TTPs]
-
-
+----------------------------------------------------------------
 benefits: 
+----------------------------------------------------------------
 >enables internal malware DB: data will be documented for analysts to back-search against for future incidents.
 >helps create sequential parent-child process chain for those hunting for KC7 iocs. 
 
-
+----------------------------------------------------------------
 static flow:
-
+----------------------------------------------------------------
 perform hunt for the following artifacts:
 >File hash*: [md5/sha256] *1st check if publically known, then resume acquiring remaining artifacts*
 *avoid duplicate effort when time sensitive*
@@ -30,15 +34,32 @@ perform hunt for the following artifacts:
 >>>>	File Format: [elf/etc]
 >>>>	File architecture: [x86bit or x64bit]
 >>>> 	File Strings: what malware can do [unobfuscated metadata]
->>>>	
-
-
+>>>>
 >File Packer Behaviour: [yes/no]
 >>File Packer Technique: [UPX/FastPack/custom]
+----------------------------------------------------------------
+Strings:
+----------------------------------------------------------------
+>useful human-readables ASCII or Unicode
 
+look for:
+>Files Names
+>URLs [that malware connects to]
+>IP Addrs 
+>Reg Keys
 
+Tip: Malware Author can utilize dummy strings for +obfuscation.
 
+Toolkit: 
+CMD>Strings
+[strings -a -n 6 c:/downloads/file]
+PEStudio
+[strings + group 30 [imported dll]]
+peid
+
+----------------------------------------------------------------
 PE Info:
+----------------------------------------------------------------
 contains *structure*
 https://learn.microsoft.com/en-us/archive/msdn-magazine/2002/february/inside-windows-win32-portable-executable-file-format-in-detail
 
@@ -49,8 +70,9 @@ PEStudio [PE analyzer]
 CFF explorer [header info]
 
 
-
+----------------------------------------------------------------
 Hashing:
+----------------------------------------------------------------
 generates cryptographic algorithm against file
 
 common algorithms:
@@ -70,25 +92,9 @@ HashCalc
 PEStudio
 Cmd>CertUtil
 
-Strings:
->useful human-readables ASCII or Unicode
-
-look for:
->Files Names
->URLs [that malware connects to]
->IP Addrs 
->Reg Keys
-
-Tip: Malware Author can utilize dummy strings for +obfuscation.
-
-Toolkit: 
-CMD>Strings
-[strings -a -n 6 c:/downloads/file]
-PEStudio
-[strings + group 30 [imported dll]]
-peid
-
+----------------------------------------------------------------
 Packers
+----------------------------------------------------------------
 benign goal: compression
 
 malicious goal: obfuscation
@@ -109,19 +115,7 @@ ExePE info
 
 https://www.howtogeek.com/427805/how-to-use-the-strings-command-on-linux/
 
-
-searching for ascii, the range is 8 chars.
-
-6 or 8,
-min is 4?
-
-strings -a [ascii only]
-
-strings -a -n 8 [minimum string length]
-
-
-strings -a -n 8 C:/dir/file > C:/dir/strings.txt [place output here]
-
+--------------------------------------------------------------------------------------------------------------------------------
 
 PE Header:
 goal: hosts data used by target OS for execution
