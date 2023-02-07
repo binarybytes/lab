@@ -1,0 +1,121 @@
+PEB:useful data about executables at runtime.
+PEB located at [gs:60h]
+~~~~~~~~~~~~~~~~~~~~~~~
+struct PEB:
+~~~~~~~~~~~~~~~~~~~~~~~
+***
+LoaderData [structure] PPEB_LDR_DATA LoaderData [variable]
+ProcessParameters [structure] RTL_USER_PROCESS_PARAMETERS [variable]
+***
+
+When accessing PEB_LDR_DATA, the [LDR_DATA_TABLE_ENTRY] will be offsetted with +0, +10h, +20h
+
+Note:
+find process info via memory manager vs structure in memory
+VAD tree indicates structure in mem.
+
+~~~~~~~~~~~~~~~~~~~~~~~
+VAD Tree Intro
+~~~~~~~~~~~~~~~~~~~~~~~
+Virtual Address Descriptor:
+kernel data structure [ring0] within Windows memory
+-added abstraction layers presents summary/context to lower layers 
+-layers over page directory/tables 
+--layers describing memory ranges allocated by a process
+e.g: mapped files, loaded DLLs, or private allocated regions.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+VAD Tree Part I
+~~~~~~~~~~~~~~~~~~~~~~~
+when process allocates mem via [VirtualAlloc], mem mngr creats entry in VAD tree.
+-page dir/table entries not create until process references mem page. [memory/processing friendly as it benefits from processes that allocate a large amount of memory but accesses it rarely]
+
+~~~~~~~~~~~~~~~~~~~~~~~
+VAD Tree Part II
+~~~~~~~~~~~~~~~~~~~~~~~
+3 nodes in VAD Tree + pool tags
+[_MMVAD_SHORT] aka "VadS"
+[_MMVAD] aka "Vad"
+[MMVAD_LONG] aka "Vadl"
+--format chosen via WinDbg--
+
+~~~~~~~~~~~~~~~~~~~~~~~
+Walking the Tree
+~~~~~~~~~~~~~~~~~~~~~~~
+simply identifying [_EPROCESS] structure for ProcessOfInterest[POI]
+-via tool: PTFinder
+--locate [VadRoot]
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+DFIR tools: 
+~~~~~~~~~~~~~~~~~~~~~~~
+examine VAD tree + dumps memory regions via
+[vadwalk.py] - walks VAD tree + checks integrity + displays tree [list each node, ASCII, graphViz]
+[vadinfo.py] - node data + ControlAreas/FileObjects
+[vaddump.py] - tree walk + rwx mem range to disk
+
+--these tools work with vmware vmem images + raw disk images via dd---
+
+--these tools can detect some types of malicious lib inj.
+---[ring3 rootkit; NTIllusion] can inj lib into processes
+---- + hide inj DLLs by unlinking them from module list in PEB. 
+----------these mods dont affect VAD tree + loaded DLL via mapped file in the addr space of affected process using [vadinfo], this data is undected with tools that walk PEB modules list.-------------
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+VAD conclusion: 
+~~~~~~~~~~~~~~~~~~~~~~~
+---with VAD tree data, alyst can dump mem space + grep/FTimes for strings/iocs---
+
+[Volatools + pmoddump] - attributes strings to ring3 processes + examines page directory for the process
+
+Q:can this VAD tree data be exploited?
+A: Yes via ring0 processes [DKOM attacks] - 
+---Direct Kernel Object Manipulation---
+
+~~~~~~~~~~~~~~~~~~~~~~~
+anti-forensics attacks
+~~~~~~~~~~~~~~~~~~~~~~~
+DKOM attacks can unlink VAD nodes from tree [hide data/obfuscation]
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+make memory disappear
+just. like. that.
+~~~~~~~~~~~~~~~~~~~~~~~
+a)process allocates mem via [VirtualAlloc]
+b)reference that mem space
+c)this forces mem mngr to create page table entries
+d)VAD node that shows mem region can be unlinked
+e)memory will no longer be visible from tools like [vadwalk]
+f)process is still able to access it normally 
+--memory reads appear to use page dir to access mem 
+--VAD only consulted if page fault occurs
+--can be removed with WinDbg
+note: ax of process' VAD tree in physical mem dump wnt find hidden mem region. attack on VAD.
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+future
+~~~~~~~~~~~~~~~~~~~~~~~
+VAD only shown to running processes
+kernel appears to 0 out the point to the VAD root wen process exits
+Q: how to recover unlinked trees ?
+Y: to access info about abandoned processes
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~~
+References
+~~~~~~~~~~~~~~~~~~~~~~~
+volatile memory extraction + sockets/TCP artifact extracting:
+~~~~~~~~~~~~~~~~~~~~~~~
+Petroni Jr NL, Walters A, Fraser T, Arbaugh WA. FATKit: a frame-work for the extraction and analysis of digital forensic data fromvolatile system memory. Digit Investig December 2006;3(4)
+
+Walters A. FATKit: Detecting malicious library injection andupping the ‘‘anti’’. Technical report. 4TF ResearchLaboratories; July 2006.
+
+Walters A, Petroni Jr NL. Volatools: integrating volatile memoryforensics into the digital investigation process. In: Black HatDC 2007; 2007
