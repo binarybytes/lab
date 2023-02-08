@@ -1,0 +1,15 @@
+32bit[aka x86] can run on x64 systems via WOW64 [windows-on-windows-64]
+-backwards compatability for 32bit apps installed on 64bit
+
+in order to run:
+a)32bit code must be isolated from 64bit code .'. 64bit has 2 registries for each application type.
+--32bit cant be merged w 64bit, so the app including dll must be 1 or the other.
+
+b)32bit apps that require RW roles to/from \windows\system32 folder, engages the WOW64 emulator to redirect the requests to \windows\SysWOW64 folder, as the System32 folder is the repo for 64bit apps. 
+Y: idk. MS is weird /shrug.
+
+SysWOW64 is the emulator designed to run 32bit apps
+x64 apps are designed to place their DLLs in \win\system32
+
+
+https://learn.microsoft.com/en-us/archive/blogs/ashishme/32-bit-vs-64-bit
