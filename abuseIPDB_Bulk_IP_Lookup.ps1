@@ -2,17 +2,16 @@ $key = ""
 $ioc = Get-Content .\ioc.txt
 foreach($ip in $ioc)
 {
-$url= "https://www.abuseipdb.com/check/"+$ip
 $header = @{
-        'Key' = $key;
-    }
+'Key' = $key;
+}
 
 $uri = "https://api.abuseipdb.com/api/v2/check"
-    $body = @{
-        'ipAddress' = $ip;
-        'maxAgeInDays' = '365';
-        'verbose' = '';
-    }
+$body = @{
+'ipAddress' = $ip;
+'maxAgeInDays' = '365';
+'verbose' = '';
+}
 
             $bulkLookup = Invoke-RestMethod -Method GET $uri -Header $header -Body $body -ContentType 'application/json; charset=utf-8'
             $address = $bulkLookup.data.ipAddress
