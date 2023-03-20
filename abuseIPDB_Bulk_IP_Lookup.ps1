@@ -1,9 +1,16 @@
+#####################################################################################################################
 $key = ""
+$dcode = [System.Text.Encoding]::ascii.GetString([System.Convert]::FromBase64String($key))
+$time = Get-Date -UFormat "%m/%d/%Y %r"
 $ioc = Get-Content .\ioc.txt
+#####################################################################################################################
+Write-Host "----------------------------------"
+Write-Host "Bulk Lookup IP Addresses via AbuseIPDB" -ForegroundColor Yellow
+Write-Host "Start Time:" $time -ForegroundColor Cyan
 foreach($ip in $ioc)
 {
 $header = @{
-'Key' = $key;
+'Key' = $dcode;
 }
 
 $uri = "https://api.abuseipdb.com/api/v2/check"
@@ -37,3 +44,10 @@ $body = @{
              Write-Host '----------------------------------------------------------------------------'
 
         }
+
+
+ 
+Write-Host "----------------------------------"
+Write-Host "Lookup Status: Complete" -ForegroundColor Green
+Write-Host "End Time:" $time -ForegroundColor Cyan
+Write-Host "----------------------------------"
